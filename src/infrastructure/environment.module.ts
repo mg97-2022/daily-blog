@@ -20,6 +20,8 @@ const envFilePath = `env/.env.${process.env.NODE_ENV}`;
           .valid(Environments.DEVELOPMENT)
           .default(Environments.DEVELOPMENT),
         CORS_ORIGINS: Joi.string().required(),
+        JWT_SECRET: Joi.string().required(),
+        JWT_EXPIRES_IN: Joi.string().required(),
         // database
         MONGO_URI: Joi.string().required(),
         MONGO_DB_NAME: Joi.string().required(),

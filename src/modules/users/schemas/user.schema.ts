@@ -14,9 +14,6 @@ export class User {
   @Prop({ unique: true, required: true, index: true })
   email: string;
 
-  @Prop()
-  profileImage?: string;
-
   @Prop({ required: true })
   password: string;
 
@@ -41,9 +38,6 @@ export class User {
 
   @Prop()
   otpExpiry?: Date;
-
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
