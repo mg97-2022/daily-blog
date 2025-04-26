@@ -48,7 +48,10 @@ export class CatchAllExceptions implements ExceptionFilter {
 
     if (statusCode === HttpStatus.INTERNAL_SERVER_ERROR) {
       this.logger.error(`Error occurred: ${message}`, {
-        extra: exception,
+        meta: {
+          exception,
+          stack: exception instanceof Error ? exception.stack : undefined,
+        },
       });
     }
 
