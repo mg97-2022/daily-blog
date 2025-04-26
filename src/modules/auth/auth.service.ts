@@ -13,7 +13,7 @@ import { OtpType } from 'src/common/enums/otp-type.enum';
 import { DateService } from 'src/common/services/date.service';
 import { UsersRepository } from '../users/users.repository';
 import { JwtService } from '@nestjs/jwt';
-import { UserDocument } from '../users/schemas/user.schema';
+import { User } from '../users/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -53,7 +53,7 @@ export class AuthService {
     user.otpType = undefined;
     user.otpExpiry = undefined;
     user.status = UserAccountStatus.VERIFIED;
-    await user.save();
+    await this.usersRepository.updateById(user);
   }
 
   async login(email: string, password: string): Promise<LoginResponseDto> {
@@ -87,7 +87,7 @@ export class AuthService {
     };
   }
 
-  private verifyOtpOrFail(user: UserDocument, otpType: OtpType): void {
+  private verifyOtpOrFail(user: User, otpType: OtpType): void {
     if (user.otpType !== otpType) {
       throw new BadRequestException('Invalid OTP');
     } else if (!user.otpExpiry || user.otpExpiry < new Date()) {

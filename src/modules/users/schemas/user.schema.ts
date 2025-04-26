@@ -1,13 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
 import { OtpType } from 'src/common/enums/otp-type.enum';
 import { UserAccountStatus } from 'src/common/enums/user-account-status.enum';
+import { BaseSchema } from 'src/common/schema/base.schema';
 import { UserRole } from 'src/common/enums/user-role.enum';
 
-export type UserDocument = HydratedDocument<User>;
-
-@Schema({ timestamps: true })
-export class User {
+@Schema()
+export class User extends BaseSchema {
   @Prop({ required: true })
   name: string;
 
