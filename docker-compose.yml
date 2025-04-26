@@ -6,10 +6,12 @@ services:
       - 27017:27017
     restart: always
     volumes:
-      - data:/data
+      - daily-blog-mongo-data:/data
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 136910Mg
+    networks:
+      - daily-blog-network
 
   mongo-express:
     image: mongo-express
@@ -22,6 +24,12 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: 136910Mg
       ME_CONFIG_MONGODB_URL: mongodb://root:136910Mg@mongo:27017/
       ME_CONFIG_BASICAUTH: false
+    networks:
+      - daily-blog-network
 
 volumes:
-  data:
+  daily-blog-mongo-data:
+
+networks:
+  daily-blog-network:
+    driver: bridge
