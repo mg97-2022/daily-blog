@@ -52,12 +52,29 @@ export abstract class BaseRepository<TModel extends BaseSchema> {
   }
 
   async updateById(updateQuery: UpdateQuery<TModel>): Promise<TModel | null> {
+    const { _id, ...rest } = updateQuery as any;
+
+    const updateData: any = {};
+    const unsetData: any = {};
+
+    for (const key in rest) {
+      if (rest[key] === undefined) {
+        unsetData[key] = '';
+      } else {
+        updateData[key] = rest[key];
+      }
+    }
+
+    const finalUpdate: any = {
+      $set: { ...updateData, updatedAt: new Date() },
+    };
+
+    if (Object.keys(unsetData).length > 0) {
+      finalUpdate['$unset'] = unsetData;
+    }
+
     return (await this.model
-      .findOneAndUpdate(
-        { _id: updateQuery._id },
-        { ...updateQuery, updatedAt: new Date() },
-        { new: true },
-      )
+      .findOneAndUpdate({ _id }, finalUpdate, { new: true })
       .lean()
       .exec()) as TModel;
   }
