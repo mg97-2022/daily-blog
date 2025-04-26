@@ -27,6 +27,28 @@ services:
     networks:
       - daily-blog-network
 
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - '6379:6379'
+    restart: always
+    networks:
+      - daily-blog-network
+
+  redis-commander:
+    image: rediscommander/redis-commander
+    container_name: redis-commander
+    ports:
+      - '8082:8081'
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    networks:
+      - daily-blog-network
+
 volumes:
   daily-blog-mongo-data:
 
