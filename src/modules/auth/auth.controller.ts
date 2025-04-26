@@ -20,7 +20,7 @@ export class AuthController {
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
   async signup(@Body() signupDto: SignupDto): Promise<void> {
-    return this.authService.signup(signupDto);
+    await this.authService.signup(signupDto);
   }
 
   @Patch('verify-account')
