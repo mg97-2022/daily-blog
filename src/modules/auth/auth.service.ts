@@ -14,6 +14,9 @@ import { DateService } from 'src/common/services/date.service';
 import { UsersRepository } from '../users/users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/schemas/user.schema';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { v4 as uuidv4 } from 'uuid';
+import Redis from 'ioredis';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +26,7 @@ export class AuthService {
     private readonly otpService: OTPService,
     private readonly dateService: DateService,
     private readonly jwtService: JwtService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async signup(signupDto: SignupDto): Promise<void> {
@@ -90,7 +94,7 @@ export class AuthService {
       throw new UnauthorizedException('Account not verified');
     }
 
-    const payload = { sub: user._id };
+    const payload = { sub: user._id, tokenId: uuidv4() };
     const accessToken = await this.jwtService.signAsync(payload);
 
     return {
@@ -133,6 +137,15 @@ export class AuthService {
     user.otpType = undefined;
     user.otpExpiry = undefined;
     await this.usersRepository.updateById(user);
+  }
+
+  async logout(accessToken: string): Promise<void> {
+    const { exp, tokenId } = (await this.jwtService.decode(accessToken)) || {};
+    const currentTime = Math.floor(Date.now() / 1000);
+    const ttl = exp - currentTime;
+    if (ttl > 0) {
+      await this.redis.set(tokenId, 'blacklisted', 'EX', ttl);
+    }
   }
 
   private verifyOtpOrFail(user: User, otpType: OtpType): void {

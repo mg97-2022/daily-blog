@@ -8,6 +8,7 @@ import { ThrottlerBehindProxyGuard } from './http/guards/throttler-behind-proxy.
 import { CatchAllExceptions } from './http/filters/catch-all-exceptions.filter';
 import { WinstonLoggerModule } from './infrastructure/logger/winston-logger.module';
 import { UsersModule } from './modules/users/users.module';
+import { RedisModule } from './infrastructure/redis/redis.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from './modules/users/users.module';
     DatabaseModule,
     UsersModule,
     AuthModule,
+    RedisModule,
   ],
   providers: [
     {

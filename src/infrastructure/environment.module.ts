@@ -4,6 +4,7 @@ import { appConfig } from 'src/config/app.config';
 import { databaseConfig } from 'src/config/database.config';
 import * as Joi from 'joi';
 import { Environments } from 'src/common/enums/environment.enum';
+import { redisConfig } from 'src/config/redis.config';
 
 const envFilePath = `env/.env.${process.env.NODE_ENV}`;
 
@@ -12,7 +13,7 @@ const envFilePath = `env/.env.${process.env.NODE_ENV}`;
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath,
-      load: [databaseConfig, appConfig],
+      load: [databaseConfig, appConfig, redisConfig],
       validationSchema: Joi.object({
         // app
         PORT: Joi.number().required(),
@@ -25,6 +26,8 @@ const envFilePath = `env/.env.${process.env.NODE_ENV}`;
         // database
         MONGO_URI: Joi.string().required(),
         MONGO_DB_NAME: Joi.string().required(),
+        // redis
+        REDIS_URL: Joi.string().required(),
       }),
     }),
   ],

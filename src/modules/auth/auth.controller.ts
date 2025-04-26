@@ -5,6 +5,8 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginBodyDto } from './dto/login-body.dto';
@@ -15,6 +17,8 @@ import { minutes, Throttle } from '@nestjs/throttler';
 import { ForgotPasswordBodyDto } from './dto/forgot-password-body.dto';
 import { ResendAccountVerificationOtpBodyDto } from './dto/resend-account-verification-otp-body.dto';
 import { ResetPasswordDto } from './dto/reset-password-body.dto';
+import { Request as ExpressRequest } from 'express';
+import { AuthGuard } from 'src/http/guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -72,5 +76,14 @@ export class AuthController {
       resetPasswordDto.otp,
       resetPasswordDto.password,
     );
+  }
+
+  @Post('logout')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Request() req: ExpressRequest): Promise<void> {
+    // Must be existing as I use AuthGuard
+    const accessToken = req.headers.authorization!.split(' ')[1] as string;
+    await this.authService.logout(accessToken);
   }
 }
