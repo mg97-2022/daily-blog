@@ -123,8 +123,8 @@ export class CatchAllExceptions implements ExceptionFilter {
 
   private handleDuplicateErrorMessage(keyValue: Record<string, any>): string {
     const [key, value] = Object.entries(keyValue)[0] || [];
-    return key && value
-      ? `Duplicate key (${key}: ${value})`
+    return key
+      ? `Duplicate key (${key}${value ? `: ${value}` : ''})`
       : 'Duplicate key error';
   }
 }
