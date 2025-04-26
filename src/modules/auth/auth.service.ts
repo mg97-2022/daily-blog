@@ -39,7 +39,7 @@ export class AuthService {
       otpExpiry: this.dateService.addMinutes(15),
     });
 
-    // Send otp using email in rabbitMQ
+    // TODO: Send otp using email in rabbitMQ
   }
 
   async verifyAccount(otp: string): Promise<void> {
@@ -54,6 +54,22 @@ export class AuthService {
     user.otpExpiry = undefined;
     user.status = UserAccountStatus.VERIFIED;
     await this.usersRepository.updateById(user);
+  }
+
+  async resendAccountVerificationOtp(email: string): Promise<void> {
+    const user = await this.usersRepository.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    } else if (user.status === UserAccountStatus.VERIFIED) {
+      throw new BadRequestException('Account already verified');
+    }
+
+    user.otp = this.otpService.generateOtp();
+    user.otpType = OtpType.VERIFY_EMAIL;
+    user.otpExpiry = this.dateService.addMinutes(15);
+    await this.usersRepository.updateById(user);
+
+    // TODO: Send otp using email in rabbitMQ
   }
 
   async login(email: string, password: string): Promise<LoginResponseDto> {
@@ -85,6 +101,38 @@ export class AuthService {
         email: user.email,
       },
     };
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersRepository.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    } else if (user.status !== UserAccountStatus.VERIFIED) {
+      throw new BadRequestException('Account not verified');
+    }
+
+    user.otp = this.otpService.generateOtp();
+    user.otpType = OtpType.RESET_PASSWORD;
+    user.otpExpiry = this.dateService.addMinutes(15);
+    await this.usersRepository.updateById(user);
+
+    // TODO: Send otp using email in rabbitMQ
+  }
+
+  async resetPassword(otp: string, newPassword: string): Promise<void> {
+    const user = await this.usersRepository.findByOtp(otp);
+    if (!user) {
+      throw new BadRequestException('Invalid OTP');
+    }
+    this.verifyOtpOrFail(user, OtpType.RESET_PASSWORD);
+
+    const hashedPassword = await this.hashingService.hash(newPassword);
+    user.password = hashedPassword;
+    user.passwordChangedAt = new Date();
+    user.otp = undefined;
+    user.otpType = undefined;
+    user.otpExpiry = undefined;
+    await this.usersRepository.updateById(user);
   }
 
   private verifyOtpOrFail(user: User, otpType: OtpType): void {
